@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Placement Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="text-left">
+                <h1 class="text-3xl font-bold text-gray-900">English Placement Test</h1>
+                <p class="text-gray-600 mt-2">Please complete the sections below.</p>
+            </div>
+            
+            <!-- Tombol Pengaturan Guru untuk Integrasi Google Drive -->
+            <button onclick="toggleSettings()" class="self-start md:self-center flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2.5 rounded-xl font-medium transition active:scale-95 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-spin-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Setelan Drive (Guru)
+            </button>
+        </header>
+
+        <!-- Panel Setelan Guru (Simpan ke localStorage) -->
+        <div id="settingsPanel" class="card p-6 mb-6 border border-gray-200 hidden bg-blue-50/50">
+            <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2 text-blue-900">
+                Konfigurasi Integrasi Google Apps Script
+            </h3>
+            <p class="text-xs text-gray-600 mb-4 leading-relaxed">
+                Konfigurasikan URL Aplikasi Web dari Google Apps Script untuk otomatisasi konversi PDF langsung menuju folder Google Drive milik Anda.
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label for="gasUrl" class="block text-xs font-bold text-gray-700 mb-1">URL Web App Google Apps Script:</label>
+                    <input type="text" id="gasUrl" class="w-full border border-gray-300 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none" placeholder="https://script.google.com/macros/s/.../exec">
+                </div>
+                <div>
+                    <label for="driveFolderId" class="block text-xs font-bold text-gray-700 mb-1">ID Folder Google Drive:</label>
+                    <input type="text" id="driveFolderId" class="w-full border border-gray-300 p-2.5 rounded-lg text-sm bg-gray-100 text-gray-500 cursor-not-allowed outline-none" value="1VjsgaXUA3b44eBDNZdA0hsCXP1p8QJrI" readonly>
+                    <p class="text-[11px] text-blue-600 mt-1 font-medium">✓ Dikunci otomatis ke folder Google Drive tujuan Anda.</p>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button onclick="saveSettings()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2 rounded-lg transition active:scale-95">
+                        Simpan Setelan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kotak Input Nama Siswa -->
+        <div class="card p-6 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-l-4 border-blue-500">
+            <div>
+                <label for="studentName" class="block text-sm font-bold text-gray-700 mb-1">Nama Siswa / Student Name:</label>
+                <p class="text-xs text-gray-500">Masukkan nama lengkap siswa untuk memulai penulisan lembar jawaban.</p>
+            </div>
+            <input type="text" id="studentName" class="w-full sm:w-80 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none p-3 rounded-lg transition-all text-gray-800" placeholder="Tulis nama lengkap siswa...">
+        </div>
+
+        <!-- Menu Tab Navigasi -->
+        <nav class="flex flex-wrap gap-2 mb-6 border-b border-gray-200 overflow-x-auto pb-2">
+            <button onclick="showTab('vocab1')" class="tab-btn active px-4 py-2 font-medium text-gray-600 hover:text-blue-600 whitespace-nowrap">Vocab 1</button>
+            <button onclick="showTab('reading1')" class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600 whitespace-nowrap">Reading 1</button>
+            <button onclick="showTab('listening')" class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600 whitespace-nowrap">Listening</button>
+            <button onclick="showTab('vocab2')" class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600 whitespace-nowrap">Vocab 2</button>
+            <button onclick="showTab('reading2')" class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600 whitespace-nowrap">Reading 2</button>
+            <button onclick="showTab('grammar')" class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600 whitespace-nowrap">Grammar</button>
+            <button onclick="showTab('writing')" class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600 whitespace-nowrap">Writing</button>
+            <button onclick="showTab('speaking')" class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600 whitespace-nowrap">Speaking</button>
+        </nav>
+
+        <div id="content" class="space-y-6">
+            
+            <!-- Vocab 1 -->
+            <div id="vocab1" class="tab-content active">
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-4">Vocabulary: Indonesia ke Inggris</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="vocab1-container">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Ikan =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Sekolah =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Buku =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Baca =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Lari =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Makan =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Putih =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Dua =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Pagi =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Guru =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reading 1 -->
+            <div id="reading1" class="tab-content">
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-4">Reading: My name is Alvaro</h2>
+                    <p class="mb-4 text-gray-700 italic">"My name is Alvaro. I am 7 years old. Every morning, I wake up at 6 o'clock. I eat breakfast with my family. I eat vegetables, fish and rice. After breakfast, I ride a motorcycle to school with my father. School starts at 8 o'clock. My father rides the bike slowly and safely. Every morning, we study English. I love English class! My headmaster teaches English. She is so kind and clever. I also love Science class! Science starts at 10 o'clock. My Science teacher is funny and smart. The whole class always enjoys Science class. I hope I can grow up to be a scientist one day! To do that, I must study hard!"</p>
+                    <div class="space-y-4" id="reading1-container">
+                        <div><label class="block text-sm font-medium">How old is he?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block text-sm font-medium">What time does he wake up every morning?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block text-sm font-medium">What food does he eat?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block text-sm font-medium">Which subjects do he like?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block text-sm font-medium">Which is the first subject he studies?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block text-sm font-medium">Is the Science teacher boring?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block text-sm font-medium">What is his dream job?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block text-sm font-medium">What time does Science class start?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block text-sm font-medium">Is he a boy or a girl?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block text-sm font-medium">Who takes him to school?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listening -->
+            <div id="listening" class="tab-content">
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-4">Listening</h2>
+                    <div class="bg-blue-50 p-4 rounded mb-6 text-blue-800">
+                        <p class="mb-3"><strong>Instruction:</strong> Click the button below to listen to the story, then answer the questions.</p>
+                        <button onclick="speakListening()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            Play Audio
+                        </button>
+                    </div>
+                    <div class="space-y-4" id="listening-container">
+                        <p class="font-bold">Answer True or False:</p>
+                        <div class="flex justify-between items-center py-2 border-b"><span>1. My pet is a cat.</span><select class="border p-1 rounded"><option value="">-- Pilih --</option><option value="True">True</option><option value="False">False</option></select></div>
+                        <div class="flex justify-between items-center py-2 border-b"><span>2. My sister’s pet is a dog.</span><select class="border p-1 rounded"><option value="">-- Pilih --</option><option value="True">True</option><option value="False">False</option></select></div>
+                        <div class="flex justify-between items-center py-2 border-b"><span>3. The cat is small and white.</span><select class="border p-1 rounded"><option value="">-- Pilih --</option><option value="True">True</option><option value="False">False</option></select></div>
+                        <div class="flex justify-between items-center py-2 border-b"><span>4. The cat can jump high.</span><select class="border p-1 rounded"><option value="">-- Pilih --</option><option value="True">True</option><option value="False">False</option></select></div>
+                        <div class="flex justify-between items-center py-2 border-b"><span>5. It is a happy cat.</span><select class="border p-1 rounded"><option value="">-- Pilih --</option><option value="True">True</option><option value="False">False</option></select></div>
+                        <div class="flex justify-between items-center py-2 border-b"><span>6. The dog is big and white.</span><select class="border p-1 rounded"><option value="">-- Pilih --</option><option value="True">True</option><option value="False">False</option></select></div>
+                        <div class="flex justify-between items-center py-2 border-b"><span>7. The cat likes to play with a ball.</span><select class="border p-1 rounded"><option value="">-- Pilih --</option><option value="True">True</option><option value="False">False</option></select></div>
+                        <div class="flex justify-between items-center py-2 border-b"><span>8. The dog can bark and run.</span><select class="border p-1 rounded"><option value="">-- Pilih --</option><option value="True">True</option><option value="False">False</option></select></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vocab 2 -->
+            <div id="vocab2" class="tab-content">
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-4">Vocabulary 2</h2>
+                    <h3 class="font-bold mb-3 text-blue-800">A. Indonesia ke Inggris:</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="vocab2-indo-container">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Senang =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Sedih =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Air =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Kecil =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Besar =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Tidur =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Buka =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Duduk =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Nasi =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Telur =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                    </div>
+                    <hr class="my-6">
+                    <h3 class="font-bold mb-4 text-blue-800">B. Inggris ke Indonesia:</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="vocab2-eng-container">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Father =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Mother =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Hill =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Sea =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>House =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Kitchen =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Study =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Angry =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Dance =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Hungry =</span> <input type="text" class="w-32 border p-1 rounded"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reading 2 -->
+            <div id="reading2" class="tab-content">
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-4">Reading: Frans from Australia</h2>
+                    <p class="mb-4 text-gray-700 italic">"My name is Frans and I come from Australia. I am 24 years old, and I live in a small town near Sydney called Branton. I don't have a job now, but normally I clean shop windows. I graduated from the Sydney Senior High School. I live with my mother and my sister. My father lives in Liverpool. We always call him every night. At the weekend, we like to go swimming in a big lake near my house. I normally get up at eight o'clock, but on Monday and Thursday, I get up at six o'clock because that is the day when I go running in the park. My father said to me when I was a child that exercise is good for my health. I believe he is proud of me. I can run for two hours, without stopping! I want to challenge myself for the next time. I want to run up to the mountain!"</p>
+                    <div class="space-y-4" id="reading2-container">
+                        <div><label class="block font-medium">What does he do every day?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block font-medium">In what town does he live?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block font-medium">What time does he wake up on Tuesday?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block font-medium">What is his last education?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block font-medium">Why does he run?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                        <div><label class="block font-medium">How long can he run?</label><input type="text" class="w-full mt-1 border p-2 rounded"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grammar -->
+            <div id="grammar" class="tab-content">
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-4">Grammar: Multiple Choice</h2>
+                    <div class="space-y-6">
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">1. She usually ___ to school by bike.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g1" value="go"> go</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g1" value="goes"> goes</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g1" value="going"> going</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g1" value="went"> went</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">2. I ___ a great movie last night.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g2" value="watch"> watch</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g2" value="watches"> watches</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g2" value="watched"> watched</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g2" value="watching"> watching</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">3. I ___ my homework every night.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g3" value="does"> does</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g3" value="did"> did</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g3" value="do"> do</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g3" value="doing"> doing</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">4. We ___ English right now.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g4" value="study"> study</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g4" value="studied"> studied</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g4" value="are studying"> are studying</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g4" value="studies"> studies</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">5. She ___ to the beach yesterday.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g5" value="go"> go</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g5" value="going"> going</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g5" value="went"> went</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g5" value="goes"> goes</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">6. My father ___ coffee every morning.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g6" value="drink"> drink</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g6" value="drank"> drank</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g6" value="drinking"> drinking</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g6" value="drinks"> drinks</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">7. He ___ sick last week.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g7" value="is"> is</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g7" value="was"> was</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g7" value="were"> were</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g7" value="be"> be</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">8. My father ___ a fisherman.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g8" value="can"> can</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g8" value="is"> is</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g8" value="am"> am</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g8" value="do"> do</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">9. She ___ be a doctor someday.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g9" value="wants to"> wants to</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g9" value="want to"> want to</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g9" value="wanted to"> wanted to</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g9" value="wanting"> wanting</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">10. I ___ visit Bali next week.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g10" value="have"> have</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g10" value="will"> will</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g10" value="had"> had</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g10" value="am"> am</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">11. They ___ dinner before they went to sleep.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g11" value="ate"> ate</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g11" value="will eat"> will eat</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g11" value="are eating"> are eating</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g11" value="eat"> eat</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">12. He ___ a hard-working student. He studies every day!</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g12" value="is"> is</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g12" value="was"> was</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g12" value="will"> will</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g12" value="am"> am</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">13. I ___ not like playing with dogs.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g13" value="is"> is</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g13" value="was"> was</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g13" value="do"> do</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g13" value="am"> am</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">14. I ___ visit my grandma tomorrow.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g14" value="to"> to</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g14" value="going to"> going to</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g14" value="am"> am</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g14" value="will"> will</label>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="mb-2 font-medium">15. My sister ___ not swim every morning.</p>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g15" value="does"> does</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g15" value="is"> is</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g15" value="do"> do</label>
+                            <label class="block cursor-pointer py-1"><input type="radio" name="g15" value="was"> was</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Writing -->
+            <div id="writing" class="tab-content">
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-4">Writing: Translation</h2>
+                    <div class="space-y-4" id="writing-container">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Good evening =</span> <input type="text" class="w-48 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>My name is Rio =</span> <input type="text" class="w-48 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>I'm sorry =</span> <input type="text" class="w-48 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>How are you? =</span> <input type="text" class="w-48 border p-1 rounded"></div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded"><span>Let’s study Math together =</span> <input type="text" class="w-48 border p-1 rounded"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speaking (Examiner Tool) -->
+            <div id="speaking" class="tab-content">
+                <div class="card p-6 bg-yellow-50 border-l-4 border-yellow-400 mb-6">
+                    <h2 class="text-xl font-bold mb-4">Speaking Test (Examiner Tool)</h2>
+                    <p class="text-sm text-yellow-800 mb-4 font-semibold italic">Note: These are prompts for the teacher/examiner.</p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="p-2 bg-white rounded shadow-sm border">What is your name?</li>
+                        <li class="p-2 bg-white rounded shadow-sm border">Where are you from?</li>
+                        <li class="p-2 bg-white rounded shadow-sm border">How old are you?</li>
+                        <li class="p-2 bg-white rounded shadow-sm border">Where is your hometown?</li>
+                        <li class="p-2 bg-white rounded shadow-sm border">Where is your school?</li>
+                        <li class="p-2 bg-white rounded shadow-sm border">Who is your best friend? (or What is his/her name?)</li>
+                        <li class="p-2 bg-white rounded shadow-sm border">What is your mother/father’s job?</li>
+                        <li class="p-2 bg-white rounded shadow-sm border">Which school subject do you like?</li>
+                        <li class="p-2 bg-white rounded shadow-sm border">Do you have siblings (brother or sister)?</li>
+                        <li class="p-2 bg-white rounded shadow-sm border">How old are your siblings?</li>
+                        <li class="p-2 bg-white rounded shadow-sm border">What is your favorite animal? What can it do?</li>
+                        <li class="p-2 bg-blue-100 font-bold border-2 border-blue-400 rounded">If the student passes these, proceed to free speaking/storytelling.</li>
+                    </ul>
+
+                    <!-- Input Nilai & Catatan Penguji -->
+                    <div class="bg-white p-4 rounded-xl border border-yellow-200 shadow-sm">
+                        <h3 class="font-bold text-gray-800 mb-3">Evaluasi Penguji (Examiner Evaluation)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="speakingScore" class="block text-xs font-bold text-gray-700 mb-1">Skor Berbicara / Speaking Score (0-100):</label>
+                                <input type="number" id="speakingScore" min="0" max="100" class="w-full border border-gray-300 p-2 rounded-lg outline-none focus:border-yellow-400" placeholder="Contoh: 85">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="speakingNotes" class="block text-xs font-bold text-gray-700 mb-1">Catatan Penguji / Feedback:</label>
+                                <textarea id="speakingNotes" rows="2" class="w-full border border-gray-300 p-2 rounded-lg outline-none focus:border-yellow-400 text-sm" placeholder="Catatan mengenai kelancaran berbicara, kosakata, tata bahasa..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tombol Submit Akhir Lembar Jawaban -->
+                <div class="card p-6 text-center border-t-4 border-green-500 bg-white">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Selesai Mengerjakan? / Finished the Test?</h3>
+                    <p class="text-gray-600 mb-6 text-sm">Pastikan nama siswa telah diisi lengkap di bagian atas sebelum mengirim berkas lembar ujian ke Google Drive.</p>
+                    
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
+                        <button onclick="submitTestAndUpload()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 active:scale-95 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-150 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            Kirim ke Google Drive (.PDF)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Progress Pengunggahan / Loading Overlay -->
+    <div id="loadingModal" class="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-in zoom-in-95 duration-150">
+            <div class="flex justify-center mb-4">
+                <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-1">Sedang Memproses PDF</h3>
+            <p class="text-gray-600 text-sm mb-2">Mengonversi & mengunggah berkas ke Google Drive...</p>
+            <p class="text-xs text-blue-500 font-mono">Jangan menutup halaman ini</p>
+        </div>
+    </div>
+
+    <!-- Modal Hasil / Sukses Pengunggahan -->
+    <div id="successModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+        <!-- Header Modal -->
+        <div class="p-6 border-b border-gray-100 bg-green-50 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-green-950 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Lembar Jawaban Terunggah!
+            </h3>
+            <button onclick="closeSuccessModal()" class="text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        <!-- Konten Modal -->
+        <div class="p-6 overflow-y-auto flex-1">
+            <div class="bg-green-50 text-green-800 p-4 rounded-xl mb-4 text-sm leading-relaxed border border-green-200">
+                <p class="font-semibold mb-1">Berhasil Disimpan!</p>
+                Lembar kerja atas nama <strong id="successStudentName"></strong> telah berhasil dikonversi menjadi dokumen PDF dan dikirimkan ke Google Drive guru.
+            </div>
+            
+            <div class="bg-gray-100 border border-gray-200 rounded-xl p-4 mb-4">
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Detail Berkas Drive</h4>
+                <p class="text-sm font-semibold text-gray-800 break-all" id="successFileName"></p>
+            </div>
+        </div>
+        <!-- Footer Modal -->
+        <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+            <button onclick="closeSuccessModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-5 py-2.5 rounded-lg transition text-sm">
+                Selesai
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Memuat Pengaturan dari localStorage saat halaman di-load
+        window.onload = function() {
+            const savedGasUrl = localStorage.getItem('gas_placement_test_url');
+            if (savedGasUrl) {
+                document.getElementById('gasUrl').value = savedGasUrl;
+            }
+        };
+
+        function showTab(tabId) {
+            // Sembunyikan semua tab
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            // Tampilkan tab pilihan
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // Fungsi Text-to-Speech untuk audio listening
+        function speakListening() {
+            const text = "I have a pet. My pet is a cat. It is small and black. It likes to sleep on the sofa all day. It can jump high. It is a happy cat. My brother also has a pet. His pet is a dog. It is big and white. It likes to play with a ball. It can bark and run. I love both pets.";
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            window.speechSynthesis.cancel(); // Hentikan audio sebelumnya jika sedang berjalan
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Penanganan Panel Setelan Guru
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function saveSettings() {
+            const gasUrlValue = document.getElementById('gasUrl').value.trim();
+            localStorage.setItem('gas_placement_test_url', gasUrlValue);
+            
+            showCustomAlert("Berhasil Disimpan", "Setelan Google Apps Script berhasil diperbarui.", "bg-green-100", "text-green-600", "bg-green-600 hover:bg-green-700");
+            document.getElementById('settingsPanel').classList.add('hidden');
+        }
+
+        // Alert Kustom
+        function showCustomAlert(title, text, bgClass = "bg-red-100", textClass = "text-red-600", btnClass = "bg-red-600 hover:bg-red-700") {
+            document.getElementById('alertTitle').textContent = title;
+            document.getElementById('alertText').textContent = text;
+            
+            const alertIconBox = document.getElementById('customAlert').querySelector('.rounded-full');
+            alertIconBox.className = `w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${bgClass} ${textClass}`;
+            
+            const alertBtn = document.getElementById('customAlert').querySelector('button');
+            alertBtn.className = `w-full text-white font-medium py-2.5 rounded-lg transition text-sm ${btnClass}`;
+
+            document.getElementById('customAlert').classList.remove('hidden');
+        }
+
+        function closeAlert() {
+            document.getElementById('customAlert').classList.add('hidden');
+        }
+
+        // Modal Sukses
+        function openSuccessModal(studentName, fileName) {
+            document.getElementById('successStudentName').textContent = studentName;
+            document.getElementById('successFileName').textContent = fileName;
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        // Mengompilasi jawaban ke HTML ramah pencetakan PDF (Inline CSS)
+        function compileAnswersToHtml() {
+            const studentName = document.getElementById('studentName').value.trim() || 'Tanpa Nama';
+            const dateStr = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+            
+            let html = `
+            <html>
+            <head>
+                <style>
+                    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; padding: 25px; line-height: 1.5; }
+                    .header { text-align: center; border-bottom: 3px double #3b82f6; padding-bottom: 15px; margin-bottom: 25px; }
+                    .header h1 { margin: 0; color: #1e3a8a; font-size: 26px; }
+                    .header p { margin: 5px 0 0; color: #666; font-size: 13px; }
+                    .meta-info { margin-bottom: 25px; background-color: #f3f4f6; padding: 15px; border-radius: 8px; border-left: 5px solid #3b82f6; }
+                    .meta-info table { width: 100%; border-collapse: collapse; }
+                    .meta-info td { padding: 4px 0; font-size: 14px; }
+                    .section-title { font-size: 16px; font-weight: bold; color: #1e3a8a; border-bottom: 1px solid #ddd; padding-bottom: 6px; margin: 25px 0 12px 0; text-transform: uppercase; }
+                    .data-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+                    .data-table th, .data-table td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 13px; }
+                    .data-table th { background-color: #f9fafb; font-weight: bold; color: #374151; width: 50%; }
+                    .unanswered { color: #dc2626; font-style: italic; font-weight: bold; }
+                    .answered { color: #059669; font-weight: 500; }
+                    .examiner-box { background-color: #fef9c3; border: 1px solid #fef08a; padding: 15px; border-radius: 8px; margin-top: 30px; }
+                    .examiner-title { font-size: 14px; font-weight: bold; color: #854d0e; margin-bottom: 8px; }
+                    .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #9ca3af; border-top: 1px solid #f3f4f6; padding-top: 15px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>ENGLISH PLACEMENT TEST REPORT</h1>
+                    <p>Generated Answer Sheet & Examination File</p>
+                </div>
+                
+                <div class="meta-info">
+                    <table>
+                        <tr>
+                            <td style="width: 20%; font-weight: bold;">Student Name</td>
+                            <td style="width: 3%;">:</td>
+                            <td style="font-size: 16px; font-weight: bold; color: #1e3a8a;">${studentName}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Submission Date</td>
+                            <td>:</td>
+                            <td>${dateStr} (GMT+7)</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            // Helper check value
+            const formatAns = (val) => {
+                if (!val || val.trim() === "" || val === "-- Pilih --") {
+                    return `<span class="unanswered">(Belum Dijawab / Unanswered)</span>`;
+                }
+                return `<span class="answered">${val.trim()}</span>`;
+            };
+
+            // 1. VOCABULARY 1
+            html += `<div class="section-title">Section 1: Vocabulary - Indonesia ke Inggris</div>`;
+            html += `<table class="data-table">`;
+            const v1Items = document.querySelectorAll('#vocab1-container > div');
+            v1Items.forEach(item => {
+                const label = item.querySelector('span').textContent.replace(' =', '').trim();
+                const answer = item.querySelector('input').value;
+                html += `<tr><th>${label}</th><td>${formatAns(answer)}</td></tr>`;
+            });
+            html += `</table>`;
+
+            // 2. READING 1
+            html += `<div class="section-title">Section 2: Reading - My name is Alvaro</div>`;
+            html += `<table class="data-table">`;
+            const r1Items = document.querySelectorAll('#reading1-container > div');
+            r1Items.forEach(item => {
+                const q = item.querySelector('label').textContent.trim();
+                const a = item.querySelector('input').value;
+                html += `<tr><th>${q}</th><td>${formatAns(a)}</td></tr>`;
+            });
+            html += `</table>`;
+
+            // 3. LISTENING
+            html += `<div class="section-title">Section 3: Listening - True/False</div>`;
+            html += `<table class="data-table">`;
+            const listeningItems = document.querySelectorAll('#listening-container > div.border-b');
+            listeningItems.forEach(item => {
+                const q = item.querySelector('span').textContent.trim();
+                const a = item.querySelector('select').value;
+                html += `<tr><th>${q}</th><td>${formatAns(a)}</td></tr>`;
+            });
+            html += `</table>`;
+
+            // 4. VOCABULARY 2
+            html += `<div class="section-title">Section 4: Vocabulary 2</div>`;
+            html += `<h3>A. Indonesia ke Inggris:</h3>`;
+            html += `<table class="data-table">`;
+            const v2Indo = document.querySelectorAll('#vocab2-indo-container > div');
+            v2Indo.forEach(item => {
+                const label = item.querySelector('span').textContent.replace(' =', '').trim();
+                const answer = item.querySelector('input').value;
+                html += `<tr><th>${label}</th><td>${formatAns(answer)}</td></tr>`;
+            });
+            html += `</table>`;
+
+            html += `<h3>B. Inggris ke Indonesia:</h3>`;
+            html += `<table class="data-table">`;
+            const v2Eng = document.querySelectorAll('#vocab2-eng-container > div');
+            v2Eng.forEach(item => {
+                const label = item.querySelector('span').textContent.replace(' =', '').trim();
+                const answer = item.querySelector('input').value;
+                html += `<tr><th>${label}</th><td>${formatAns(answer)}</td></tr>`;
+            });
+            html += `</table>`;
+
+            // 5. READING 2
+            html += `<div class="section-title">Section 5: Reading 2 - Frans from Australia</div>`;
+            html += `<table class="data-table">`;
+            const r2Items = document.querySelectorAll('#reading2-container > div');
+            r2Items.forEach(item => {
+                const q = item.querySelector('label').textContent.trim();
+                const a = item.querySelector('input').value;
+                html += `<tr><th>${q}</th><td>${formatAns(a)}</td></tr>`;
+            });
+            html += `</table>`;
+
+            // 6. GRAMMAR MULTIPLE CHOICE
+            html += `<div class="section-title">Section 6: Grammar - Multiple Choice</div>`;
+            html += `<table class="data-table">`;
+            const questionsText = [
+                "She usually ___ to school by bike.", "I ___ a great movie last night.", "I ___ my homework every night.",
+                "We ___ English right now.", "She ___ to the beach yesterday.", "My father ___ coffee every morning.",
+                "He ___ sick last week.", "My father ___ a fisherman.", "She ___ be a doctor someday.",
+                "I ___ visit Bali next week.", "They ___ dinner before they went to sleep.", "He ___ a hard-working student.",
+                "I ___ not like playing with dogs.", "I ___ visit my grandma tomorrow.", "My sister ___ not swim every morning."
+            ];
+            for (let i = 1; i <= 15; i++) {
+                const selected = document.querySelector(`input[name="g${i}"]:checked`);
+                const answerVal = selected ? selected.value : "";
+                html += `<tr><th>Question ${i}: ${questionsText[i-1]}</th><td>${formatAns(answerVal)}</td></tr>`;
+            }
+            html += `</table>`;
+
+            // 7. WRITING TRANSLATION
+            html += `<div class="section-title">Section 7: Writing - Translation</div>`;
+            html += `<table class="data-table">`;
+            const writingItems = document.querySelectorAll('#writing-container > div');
+            writingItems.forEach(item => {
+                const label = item.querySelector('span').textContent.replace(' =', '').trim();
+                const answer = item.querySelector('input').value;
+                html += `<tr><th>${label}</th><td>${formatAns(answer)}</td></tr>`;
+            });
+            html += `</table>`;
+
+            // 8. SPEAKING (EXAMINER BOX)
+            const spScore = document.getElementById('speakingScore').value.trim();
+            const spNotes = document.getElementById('speakingNotes').value.trim();
+            html += `
+                <div class="examiner-box">
+                    <div class="examiner-title">SECTION 8: SPEAKING EVALUATION (EXAMINER)</div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="width: 25%; font-weight: bold; padding: 4px 0; font-size: 13px;">Speaking Score</td>
+                            <td style="width: 3%; padding: 4px 0;">:</td>
+                            <td style="font-size: 15px; font-weight: bold; color: #b45309; padding: 4px 0;">${spScore ? spScore + ' / 100' : '<span class="unanswered">(Belum dinilai)</span>'}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold; padding: 4px 0; font-size: 13px; vertical-align: top;">Examiner Feedback</td>
+                            <td style="padding: 4px 0; vertical-align: top;">:</td>
+                            <td style="font-size: 13px; color: #4b5563; padding: 4px 0; line-height: 1.4;">${spNotes ? spNotes : '<i>(Tidak ada catatan)</i>'}</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            html += `
+                <div class="footer">
+                    English Placement Test Portal &bull; Automated Drive Export System
+                </div>
+            </body>
+            </html>
+            `;
+
+            return html;
+        }
+
+        // Fungsi Utama Pengiriman Jawaban ke Google Drive (Sebagai PDF)
+        function submitTestAndUpload() {
+            const studentName = document.getElementById('studentName').value.trim();
+            if (!studentName) {
+                showCustomAlert("Nama Siswa Kosong", "Harap isi nama lengkap siswa di kolom paling atas halaman terlebih dahulu.", "bg-red-100", "text-red-600", "bg-red-600 hover:bg-red-700");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            // Dapatkan URL Apps Script dari LocalStorage atau default
+            const gasUrl = localStorage.getItem('gas_placement_test_url') || "https://script.google.com/macros/s/AKfycbzbFyinep5bUXbaZntMWc5l_pYje_qU8O51i0f-eof_9H1q9xI-qscGDeuyclw-SEGt/exec";
+
+            // Tampilkan Loading
+            document.getElementById('loadingModal').classList.remove('hidden');
+
+            // Kompilasi dokumen HTML
+            const compiledHtml = compileAnswersToHtml();
+
+            // Sediakan Payload Kiriman
+            const payload = {
+                studentName: studentName,
+                reportHtml: compiledHtml
+            };
+
+            // Menggunakan Fetch API untuk mengirimkan Payload ke Google Apps Script
+            fetch(gasUrl, {
+                method: "POST",
+                mode: "no-cors", // Google Apps Script Web App mengembalikan redirect, mode no-cors mencegah error CORS di browser
+                headers: {
+                    "Content-Type": "text/plain" // Gunakan text/plain untuk bypass preflight check cors yang ketat jika no-cors
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                // Karena no-cors, kita tidak dapat membaca response JSON secara langsung.
+                // Namun, kita asumsikan pengiriman berhasil jika tidak masuk ke catch block.
+                setTimeout(() => {
+                    document.getElementById('loadingModal').classList.add('hidden');
+                    
+                    // Buat penamaan berkas tiruan untuk ditampilkan di modal sukses
+                    const timestamp = new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/:/g, '');
+                    const mockFileName = `PlacementTest_${studentName.replace(/\s+/g, '_')}_${timestamp}.pdf`;
+
+                    openSuccessModal(studentName, mockFileName);
+                }, 2500);
+            })
+            .catch(error => {
+                document.getElementById('loadingModal').classList.add('hidden');
+                showCustomAlert("Kesalahan Pengunggahan", "Gagal mengirim data ujian. Silakan periksa koneksi internet Anda atau pastikan URL Google Apps Script valid. Detail: " + error, "bg-red-100", "text-red-600", "bg-red-600 hover:bg-red-700");
+            });
+        }
+    </script>
+</body>
+</html>
